@@ -6,8 +6,11 @@ app.use(bodyParser.urlencoded({
 }));
 const sqlite3 = require('sqlite3').verbose();
 
+var orderby = 'dueDate';
+var tasks = [];
+
 //opening db connection for read write
-let db = new sqlite3.Database('./taskDB.db', (err) => {
+let db = new sqlite3.Database('./exampleDB.db', (err) => {
     if (err) {
         console.error(err.message);
     }
@@ -17,7 +20,8 @@ let db = new sqlite3.Database('./taskDB.db', (err) => {
 //Home page route
 app.get("/", function (req, res) {
 
-    db.all(`SELECT * FROM tasks`, (err, data) => {
+    // db.all(`SELECT * FROM tasks ORDER BY dueDate`, (err, data) => {
+    db.all(createQuery('SELECT', '*', 'tasks', orderby, 0), (err, data) => {
         if (err) {
             throw err;
         }
@@ -28,6 +32,14 @@ app.get("/", function (req, res) {
 });
 
 app.get("/about", function (req, res) {
+    res.send('hi');
+});
+
+app.get("/test", function (req, res) {
+    getPageData();
+    app.locals.tasks = tasks;
+    console.log('this is tasks',tasks);
+    // res.render('test.ejs');
     res.send('hi');
 });
 
@@ -69,4 +81,57 @@ function readData() {
             return row;
         });
     });
+}
+
+function getPageData() {
+    db.serialize(() => {
+        // Queries scheduled here will be serialized.
+        db.all(createQuery('SELECT', '*', 'tasks', orderby, 0), (err, data) => {
+            if (err) {
+                throw err;
+            }
+            // app.locals.data = data;
+            data.forEach(function (item, index, arr) {
+                var index = tasks.push(new task(item.status, item.dueDate, item.description, item.classID)) - 1;
+                q = createQuery('SELECT', '*', 'subTasks', 0, ("subtaskID='" + item.subtaskID + "'"));
+                db.all(q, (err, mData) => {
+                    if (err) {
+                        throw err;
+                    }
+                    mData.forEach(function (mItem, mIndex, mArr) {
+                        tasks[index].subTasks.push(new subTask(mItem.status, mItem.description));
+                        console.log(index,mIndex);
+                        if (index == 2 && mIndex == 1) {
+                            console.log(tasks);
+                        }
+                    });
+                });
+            });
+        });
+    });
+}
+
+//should return string of formatted sql query
+function createQuery(command, field, table, orderby, where) {
+    var q = command + ' ' + field + ' FROM ' + table;
+    if (orderby) {
+        q += ' ORDER BY ' + orderby;
+    }
+    if (where) {
+        q += ' WHERE ' + where;
+    }
+    return q;
+}
+
+function task(status, dueDate, description, className) {
+    this.status = status;
+    this.description = description;
+    this.dueDate = dueDate;
+    this.className = className;
+    this.subTasks = [];
+}
+
+function subTask(status, description) {
+    this.status = status;
+    this.description = description;
 }

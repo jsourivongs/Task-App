@@ -10,9 +10,14 @@
     <h1>Do it</h1>
     <p>
 
-        <% data.forEach(item => { %>
+        <% tasks.forEach(item => { %>
             <span><%= item.dueDate %></span>
             <span><%= item.description %></span>
+
+            <% item.subTasks.forEach(mItem => { %>
+                <div><%= mItem.description %></div>
+            <% }); %>
+
             <hr>
         <% }); %>
 
