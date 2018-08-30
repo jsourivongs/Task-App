@@ -13,9 +13,10 @@
         <% tasks.forEach(item => { %>
             <span><%= item.dueDate %></span>
             <span><%= item.description %></span>
+            <span><%= item.className %></span>
 
             <% item.subTasks.forEach(mItem => { %>
-                <div><%= mItem.description %></div>
+                <li><%= mItem.description %></li>
             <% }); %>
 
             <hr>

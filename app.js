@@ -35,12 +35,16 @@ app.get("/about", function (req, res) {
     res.send('hi');
 });
 
+app.get("/show", function (req, res) {
+    res.render('test.ejs');
+});
+
 app.get("/test", function (req, res) {
+    tasks = [];
     getPageData();
     app.locals.tasks = tasks;
     console.log('this is tasks',tasks);
-    // res.render('test.ejs');
-    res.send('hi');
+    res.redirect('show');
 });
 
 app.post("/addTask", function (req, res) {
@@ -93,6 +97,14 @@ function getPageData() {
             // app.locals.data = data;
             data.forEach(function (item, index, arr) {
                 var index = tasks.push(new task(item.status, item.dueDate, item.description, item.classID)) - 1;
+                q = createQuery('SELECT', 'className', 'class', 0,("classID='" + item.classID + "'"));
+                db.all(q, (err, mData) => {
+                    if (err) {
+                        throw err;
+                    }
+                    tasks[index].className = mData[0].className;
+                });
+
                 q = createQuery('SELECT', '*', 'subTasks', 0, ("subtaskID='" + item.subtaskID + "'"));
                 db.all(q, (err, mData) => {
                     if (err) {
@@ -103,6 +115,7 @@ function getPageData() {
                         console.log(index,mIndex);
                         if (index == 2 && mIndex == 1) {
                             console.log(tasks);
+                            app.locals.data = data;
                         }
                     });
                 });
@@ -123,14 +136,17 @@ function createQuery(command, field, table, orderby, where) {
     return q;
 }
 
+//object to hold each task information
 function task(status, dueDate, description, className) {
     this.status = status;
     this.description = description;
     this.dueDate = dueDate;
     this.className = className;
+    //array of subTask objects
     this.subTasks = [];
 }
 
+//subtask object, will be held in main task in an array
 function subTask(status, description) {
     this.status = status;
     this.description = description;
