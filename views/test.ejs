@@ -18,7 +18,11 @@
             <% item.subTasks.forEach(mItem => { %>
                 <li><%= mItem.description %></li>
             <% }); %>
-
+                <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
+                <!-- <form action="/addSubTask" method="POST"> -->
+                    Description: <input type="text" name="description" placeholder="description" required>
+                    <input type="submit" name="Submit">
+                </form>
             <hr>
         <% }); %>
 

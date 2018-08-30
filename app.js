@@ -55,7 +55,20 @@ app.post("/addTask", function (req, res) {
         console.log(insert);
         db.run(insert);
     });
-    res.redirect("/");
+    res.redirect("/test");
+});
+
+app.post("/addSubTask/:subtaskID", function (req, res) {
+    db.serialize(() => {
+        // console.log(res);
+        // Queries scheduled here will be serialized.
+        var subtaskID = req.params.subtaskID;
+        var insert = "INSERT INTO subTasks VALUES('" + subtaskID + "', '0', '" + req.body.description + "' )";
+        console.log(insert);
+        db.run(insert);
+
+    });
+    res.redirect("/test");
 });
 
 app.get("*", function (req, res) {
@@ -96,7 +109,7 @@ function getPageData() {
             }
             // app.locals.data = data;
             data.forEach(function (item, index, arr) {
-                var index = tasks.push(new task(item.status, item.dueDate, item.description, item.classID)) - 1;
+                var index = tasks.push(new task(item.status, item.dueDate, item.description, item.classID, item.subtaskID)) - 1;
                 q = createQuery('SELECT', 'className', 'class', 0,("classID='" + item.classID + "'"));
                 db.all(q, (err, mData) => {
                     if (err) {
@@ -137,13 +150,14 @@ function createQuery(command, field, table, orderby, where) {
 }
 
 //object to hold each task information
-function task(status, dueDate, description, className) {
+function task(status, dueDate, description, className, subtaskID) {
     this.status = status;
     this.description = description;
     this.dueDate = dueDate;
     this.className = className;
     //array of subTask objects
     this.subTasks = [];
+    this.subtaskID = subtaskID
 }
 
 //subtask object, will be held in main task in an array
