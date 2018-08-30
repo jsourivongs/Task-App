@@ -8,6 +8,7 @@ const sqlite3 = require('sqlite3').verbose();
 
 var orderby = 'dueDate';
 var tasks = [];
+var taskCount;
 
 //opening db connection for read write
 let db = new sqlite3.Database('./exampleDB.db', (err) => {
@@ -19,16 +20,7 @@ let db = new sqlite3.Database('./exampleDB.db', (err) => {
 
 //Home page route
 app.get("/", function (req, res) {
-
-    // db.all(`SELECT * FROM tasks ORDER BY dueDate`, (err, data) => {
-    db.all(createQuery('SELECT', '*', 'tasks', orderby, 0), (err, data) => {
-        if (err) {
-            throw err;
-        }
-        console.log(data);
-        app.locals.data = data;
-        res.render('home.ejs');
-    });
+    res.redirect('test');
 });
 
 app.get("/about", function (req, res) {
@@ -36,6 +28,7 @@ app.get("/about", function (req, res) {
 });
 
 app.get("/show", function (req, res) {
+    taskCount = tasks.length;
     res.render('test.ejs');
 });
 
@@ -51,7 +44,7 @@ app.post("/addTask", function (req, res) {
     db.serialize(() => {
         // console.log(res);
         // Queries scheduled here will be serialized.
-        var insert = "INSERT INTO tasks VALUES('" + req.body.status + "', '" + req.body.dueDate + "', '" + req.body.description + "', '" + req.body.classID + "', '" + req.body.subtaskID + "' )";
+        var insert = "INSERT INTO tasks VALUES('" + req.body.status + "', '" + req.body.dueDate + "', '" + req.body.description + "', '" + req.body.classID + "', '" + taskCount + "' )";
         console.log(insert);
         db.run(insert);
     });
