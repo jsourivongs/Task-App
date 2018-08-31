@@ -8,15 +8,28 @@
 </head>
 <body>
     <h1>Do it</h1>
+    <form action="/orderbyDate" method="GET">
+        Order By Date: <input type="submit" name="Submit">
+    </form>
+
+    <form action="/orderbyClass" method="GET">
+        Order By Class: <input type="submit" name="Submit">
+    </form>
     <p>
 
         <% tasks.forEach(item => { %>
             <span><%= item.dueDate %></span>
             <span><%= item.description %></span>
-            <span><%= item.className %></span>
+            <span><strong><%= item.className %></strong></span>
+            <form action=<%= "/deleteTask/" + item.subtaskID %> method="POST">
+                <input type="submit" name="Submit">
+            </form>
 
             <% item.subTasks.forEach(mItem => { %>
                 <li><%= mItem.description %></li>
+                <form action=<%= "/deleteSubTask/" + mItem.identifier %> method="POST">
+                    <input type="submit" name="Submit">
+                </form>
             <% }); %>
                 <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
                 <!-- <form action="/addSubTask" method="POST"> -->
@@ -28,7 +41,6 @@
 
     </p>
     <form action="/addTask" method="POST">
-        Status: <input type="number" name="status" id="status" placeholder="status" required>
         Due Date: <input type="date" name="dueDate" placeholder="dueDate" required>
         Description: <input type="text" name="description" placeholder="description" required>
         class: <input type="number" name="classID" required>

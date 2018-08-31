@@ -9,6 +9,7 @@ const sqlite3 = require('sqlite3').verbose();
 var orderby = 'dueDate';
 var tasks = [];
 var taskCount;
+var subTaskCount;
 
 //opening db connection for read write
 let db = new sqlite3.Database('./exampleDB.db', (err) => {
@@ -28,7 +29,21 @@ app.get("/about", function (req, res) {
 });
 
 app.get("/show", function (req, res) {
-    taskCount = tasks.length;
+    taskCount = 0;
+    tasks.forEach(item => {
+        if (item.subtaskID > taskCount) {
+            taskCount = item.subtaskID+1;
+        }
+    });
+
+    subTaskCount = 0;
+    tasks.forEach(item => {
+        item.subTasks.forEach(mItem => {
+            if (mItem.identifier >= subTaskCount) {
+                subTaskCount = mItem.identifier+1;
+            }
+        });
+    });
     res.render('test.ejs');
 });
 
@@ -44,7 +59,7 @@ app.post("/addTask", function (req, res) {
     db.serialize(() => {
         // console.log(res);
         // Queries scheduled here will be serialized.
-        var insert = "INSERT INTO tasks VALUES('" + req.body.status + "', '" + req.body.dueDate + "', '" + req.body.description + "', '" + req.body.classID + "', '" + taskCount + "' )";
+        var insert = "INSERT INTO tasks VALUES('" + 0 + "', '" + req.body.dueDate + "', '" + req.body.description + "', '" + req.body.classID + "', '" + taskCount + "' )";
         console.log(insert);
         db.run(insert);
     });
@@ -56,12 +71,48 @@ app.post("/addSubTask/:subtaskID", function (req, res) {
         // console.log(res);
         // Queries scheduled here will be serialized.
         var subtaskID = req.params.subtaskID;
-        var insert = "INSERT INTO subTasks VALUES('" + subtaskID + "', '0', '" + req.body.description + "' )";
+        var insert = "INSERT INTO subTasks VALUES('" + subtaskID + "', '0', '" + req.body.description + "', " + subTaskCount + " )";
         console.log(insert);
         db.run(insert);
 
     });
     res.redirect("/test");
+});
+
+app.post("/deleteSubTask/:identifier", function (req, res) {
+    db.serialize(() => {
+        // console.log(res);
+        // Queries scheduled here will be serialized.
+        var identifier = req.params.identifier;
+        var q = "DELETE FROM subTasks WHERE identifier='" + identifier + "'";
+        console.log(q);
+        db.run(q);
+
+    });
+    res.redirect("/test");
+});
+
+app.post("/deleteTask/:subtaskID", function (req, res) {
+    db.serialize(() => {
+        // console.log(res);
+        // Queries scheduled here will be serialized.
+        var subtaskID = req.params.subtaskID;
+        var q = "DELETE FROM tasks WHERE subtaskID='" + subtaskID + "'";
+        console.log(q);
+        db.run(q);
+
+    });
+    res.redirect("/test");
+});
+
+app.get("/orderbyDate", function (req, res) {
+    orderby = 'dueDate';
+    res.redirect('test');
+});
+
+app.get("/orderbyClass", function (req, res) {
+    orderby = 'classID, dueDate';
+    res.redirect('test');
 });
 
 app.get("*", function (req, res) {
@@ -117,7 +168,7 @@ function getPageData() {
                         throw err;
                     }
                     mData.forEach(function (mItem, mIndex, mArr) {
-                        tasks[index].subTasks.push(new subTask(mItem.status, mItem.description));
+                        tasks[index].subTasks.push(new subTask(mItem.status, mItem.description, mItem.identifier));
                         console.log(index,mIndex);
                         if (index == 2 && mIndex == 1) {
                             console.log(tasks);
@@ -154,7 +205,8 @@ function task(status, dueDate, description, className, subtaskID) {
 }
 
 //subtask object, will be held in main task in an array
-function subTask(status, description) {
+function subTask(status, description, identifier) {
     this.status = status;
     this.description = description;
+    this.identifier = identifier;
 }
