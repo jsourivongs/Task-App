@@ -31,7 +31,7 @@ app.get("/about", function (req, res) {
 app.get("/show", function (req, res) {
     taskCount = 0;
     tasks.forEach(item => {
-        if (item.subtaskID > taskCount) {
+        if (item.subtaskID >= taskCount) {
             taskCount = item.subtaskID+1;
         }
     });
@@ -97,7 +97,10 @@ app.post("/deleteTask/:subtaskID", function (req, res) {
         // console.log(res);
         // Queries scheduled here will be serialized.
         var subtaskID = req.params.subtaskID;
-        var q = "DELETE FROM tasks WHERE subtaskID='" + subtaskID + "'";
+        var q = "DELETE FROM tasks  WHERE subtaskID='" + subtaskID + "';";
+        console.log(q);
+        db.run(q);
+        q = "DELETE FROM subTasks  WHERE subtaskID='" + subtaskID + "';";
         console.log(q);
         db.run(q);
 
