@@ -7,6 +7,7 @@
     <title>Do It!</title>
 </head>
 <body>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
     <nav class="navbar navbar-default">
             <div class="container">
                 <div class="navbar-header">
@@ -40,42 +41,68 @@
             </div>
         </nav>
 
-    <div>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-1"><h6>Due</h6></div>
+            <div class="col-xs-1"><h5>Class</h5></div>
+            <div class="col-xs-8"><h4>Description</h4></div>
+            <div class="col-xs-1"><h5>Status</h5></div>
+        </div>
+        <hr>
             <% tasks.forEach(item => { %>
-                <div class="row">
-                    <form action=<%= "/deleteTask/" + item.subtaskID %> method="POST">
-                        <div class="col-md-1"><%= item.dueDate %></div>
-                        <div class="col-md-1"><strong><%= item.className %></strong></div>
-                        <div class="col-md-9"><%= item.description %></div>
-                        <div class="col-md-1"> <button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
-                    </form>
-                </div>
-                <div class="row">
-                    <% item.subTasks.forEach(mItem => { %>
-                        <form action=<%= "/deleteSubTask/" + mItem.identifier %> method="POST">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-9"> <li><%= mItem.description %></li>  </div>
-                            <div class="col-md-1"><button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
-                        </form>
-                    <% }); %>
-                </div>
-                <div class="row">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-10"> 
-                        <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
-                        <!-- <form action="/addSubTask" method="POST"> -->
-                            <li> 
-                                <input type="text" name="description" placeholder="description" required>
-                                <button type="submit" name="Submit" class="btn btn-success btn-sm" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
-                            </li>
+                <div class="item">
+                    <div class="row">
+                        <form action=<%= "/deleteTask/" + item.subtaskID %> method="POST">
+                            <div class="col-xs-1"><h6><%= item.dueDate %></h6></div>
+                            <div class="col-xs-1"><h5><%= item.className %></h5></div>
+                            <div class="col-xs-8"><h4><%= item.description %></h4></div>
+                            <div class="col-xs-1"><a href=<%= "./changeStatus/" + item.subtaskID %>>
+                                <% if (item.status <= 0) { %>
+                                    <button type="button" class="btn btn-danger btn-sm">Not Started</button>
+                                <% } else if (item.status == 1) { %>
+                                    <button type="button" class="btn btn-warning btn-sm">In Progress</button>
+                                <% } else if (item.status >= 2) { %>
+                                    <button type="button" class="btn btn-success btn-sm">Finished</button>
+                                <% } %>
+                            </a></div>
+
+                            <div class="col-xs-1"> <button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
                         </form>
                     </div>
+                    <div class="row">
+                        <% item.subTasks.forEach(mItem => { %>
+                            <form action=<%= "/deleteSubTask/" + mItem.identifier %> method="POST">
+                                <div class="col-xs-2"></div>
+                                <div class="col-xs-8"> <li><%= mItem.description %></li></div>
+                                <div class="col-xs-1"><a href=<%= "./changeSubtaskStatus/" + mItem.identifier %>>
+                                    <% if (mItem.status <= 0) { %>
+                                        <span class="glyphicon glyphicon-unchecked"></span>
+                                    <% } else { %>
+                                        <span class="glyphicon glyphicon-check"></span>
+                                    <% } %>
+                                </a></div>
+                                <div class="col-xs-1"><button type="submit" name="Submit" class="btn btn-danger btn-sm delete" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
+                            </form>
+                        <% }); %>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-2"></div>
+                        <div class="col-xs-10"> 
+                            <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
+                            <!-- <form action="/addSubTask" method="POST"> -->
+                                <li> 
+                                    <input type="text" name="description" placeholder="description" required>
+                                    <button type="submit" name="Submit" class="btn btn-success btn-sm" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
+                                </li>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                    <hr>
+                <hr>
             <% }); %>
 
         <form action="/addTask" method="POST">
-            Due Date: <input type="date" name="dueDate" placeholder="dueDate" required>
+            Due Date: <input type="date" name="dueDate" placeholder="dueDate">
             Description: <input type="text" name="description" placeholder="description" required>
             class: <input type="number" name="classID" required>
             <button type="submit" name="Submit" class="btn btn-success" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
@@ -89,5 +116,8 @@
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <script src="js/javascript.js"></script>
+
 </body>
 </html>

@@ -1,5 +1,6 @@
 var express = require("express");
 var app = express();
+app.use(express.static(__dirname + '/public'));
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({
     extended: true
@@ -106,6 +107,36 @@ app.post("/deleteTask/:subtaskID", function (req, res) {
 
     });
     res.redirect("/test");
+});
+
+app.get("/changeStatus/:subtaskID", function (req, res) {
+    console.log('in change Status!');
+    var subtaskID = req.params.subtaskID;
+    var q = "SELECT status FROM tasks WHERE subtaskID='" + subtaskID + "';";
+    db.all(q, (err, data) => {
+        if (err) {
+            throw err;
+        }
+        q = "UPDATE tasks SET status = " + ((data[0].status + 1) % 3 ) + " WHERE subtaskID='" + subtaskID + "';";
+        console.log(q);
+        db.run(q);
+    });
+    res.redirect('/test');
+});
+
+app.get("/changeSubtaskStatus/:identifier", function (req, res) {
+    console.log('in change SubTask Status!');
+    var identifier = req.params.identifier;
+    var q = "SELECT status FROM subTasks WHERE identifier='" + identifier + "';";
+    db.all(q, (err, data) => {
+        if (err) {
+            throw err;
+        }
+        q = "UPDATE subTasks SET status = " + ((data[0].status + 1) % 2 ) + " WHERE identifier='" + identifier + "';";
+        console.log(q);
+        db.run(q);
+    });
+    res.redirect('/test');
 });
 
 app.get("/orderbyDate", function (req, res) {
