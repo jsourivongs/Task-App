@@ -24,8 +24,8 @@ app.get("/", function (req, res) {
     res.redirect('test');
 });
 
-app.get("/about", function (req, res) {
-    res.send('hi');
+app.get("/credits", function (req, res) {
+    res.send('thats right bitch');
 });
 
 app.get("/show", function (req, res) {

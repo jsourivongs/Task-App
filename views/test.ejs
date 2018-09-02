@@ -7,42 +7,73 @@
     <title>Do It!</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <h1>Do it</h1>
-        <form action="/orderbyDate" method="GET">
-            Order By: <input type="submit" name="Submit" class="btn btn-primary btn-sm" value="Date">
-        </form>
+    <nav class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-nav-demo"
+                        aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a href="#" class="navbar-brand">Do It!</a>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-nav-demo">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="./credits">Created by Julian Sourivongs</a>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#">Sort by:</a>
+                        </li>
+                        <li>
+                            <a href="./orderbyDate">Date</a>
+                        </li>
+                        <li>
+                            <a href="./orderbyClass">Class</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-        <form action="/orderbyClass" method="GET">
-            Order By: <input type="submit" name="Submit" class="btn btn-primary btn-sm" value="Class">
-        </form>
-    </nav>
     <div>
-        <p>
-
             <% tasks.forEach(item => { %>
-                <form action=<%= "/deleteTask/" + item.subtaskID %> method="POST">
-                    <span style="padding-right: 20px;"><%= item.dueDate %></span>
-                    <span><strong><%= item.className %></strong></span>
-                    <span style="padding-right: 20px;"><%= item.description %></span>
-                    <button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button>
-                </form>
-
-                <% item.subTasks.forEach(mItem => { %>
-                    <form action=<%= "/deleteSubTask/" + mItem.identifier %> method="POST">
-                        <li style="display: inline;"><%= mItem.description %></li>  
-                        <button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button>
+                <div class="row">
+                    <form action=<%= "/deleteTask/" + item.subtaskID %> method="POST">
+                        <div class="col-md-1"><%= item.dueDate %></div>
+                        <div class="col-md-1"><strong><%= item.className %></strong></div>
+                        <div class="col-md-9"><%= item.description %></div>
+                        <div class="col-md-1"> <button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
                     </form>
-                <% }); %>
-                    <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
-                    <!-- <form action="/addSubTask" method="POST"> -->
-                        Description: <input type="text" name="description" placeholder="description" required>
-                        <button type="submit" name="Submit" class="btn btn-success btn-sm" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
-                    </form>
-                <hr>
+                </div>
+                <div class="row">
+                    <% item.subTasks.forEach(mItem => { %>
+                        <form action=<%= "/deleteSubTask/" + mItem.identifier %> method="POST">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-9"> <li><%= mItem.description %></li>  </div>
+                            <div class="col-md-1"><button type="submit" name="Submit" class="btn btn-danger btn-sm" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
+                        </form>
+                    <% }); %>
+                </div>
+                <div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-10"> 
+                        <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
+                        <!-- <form action="/addSubTask" method="POST"> -->
+                            <li> 
+                                <input type="text" name="description" placeholder="description" required>
+                                <button type="submit" name="Submit" class="btn btn-success btn-sm" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
+                            </li>
+                        </form>
+                    </div>
+                </div>
+                    <hr>
             <% }); %>
 
-        </p>
         <form action="/addTask" method="POST">
             Due Date: <input type="date" name="dueDate" placeholder="dueDate" required>
             Description: <input type="text" name="description" placeholder="description" required>
