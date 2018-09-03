@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Classes</title>
+</head>
+<body>
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <nav class="navbar navbar-default">
+                <div class="container">
+                    <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-nav-demo"
+                            aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a href="./test" class="navbar-brand">Do It!</a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="bs-nav-demo">
+                        <ul class="nav navbar-nav">
+                            <li>
+                                <a href="./credits">Created by Julian Sourivongs</a>
+                            </li>
+                        </ul>
+                        <ul class="nav navbar-nav navbar-right">
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+    
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-1"><h6>ID</h6></div>
+                <div class="col-xs-10"><h5>Class</h5></div>
+                <div class="col-xs-1"><button class="btn btn-danger btn-sm"><span class="glyphicon glyphicon-trash"></span></button></div>
+            </div>
+            <hr>
+            <% classes.forEach(function(item) { %>
+                    <div class="row">
+                        <form action=<%= "/deleteClass/" + item.classID %> method="POST">
+                            <div class="col-xs-1"><h6><%= item.classID %></h6></div>
+                            <div class="col-xs-10"><h5><%= item.className %></h5></div>
+                            <div class="col-xs-1"> <button type="submit" name="Submit" class="btn btn-danger btn-sm delete" value="Delete"><span class="glyphicon glyphicon-trash"></span></button></div>
+                        </form>
+                    </div>
+                <hr>
+            <% }); %>
+            <hr>
+            <nav class="navbar navbar-default navbar-fixed-bottom">
+                <div class="container">
+                    <form action="/addClass" method="POST" class="nav navbar-nav">
+                        Class ID: <input type="number" name="classID" placeholder="Class ID" required>
+                        Class Name: <input type="text" name="className" placeholder="Class Name" required>
+                        <button type="submit" name="Submit" class="btn btn-success" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
+                    </form>
+                    <a class="navbar-text nav navbar-nav navbar-right" href="./">Home</a>
+                </div>
+            </nav>
+        </div>
+        <!-- Latest compiled and minified CSS -->
+    
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    
+        <script src="js/javascript.js"></script>
+    
+</body>
+</html>

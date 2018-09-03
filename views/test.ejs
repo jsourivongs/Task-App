@@ -18,7 +18,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a href="#" class="navbar-brand">Do It!</a>
+                    <a href="./test" class="navbar-brand">Do It!</a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-nav-demo">
                     <ul class="nav navbar-nav">
@@ -92,7 +92,7 @@
                             <form action=<%= "/addSubTask/" +  item.subtaskID %> method="POST">
                             <!-- <form action="/addSubTask" method="POST"> -->
                                 <li> 
-                                    <input type="text" name="description" placeholder="description" required>
+                                    <input type="text" name="description" placeholder="description" required style="width:75%">
                                     <button type="submit" name="Submit" class="btn btn-success btn-sm" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
                                 </li>
                             </form>
@@ -101,13 +101,18 @@
                 </div>
                 <hr>
             <% }); %>
-
-        <form action="/addTask" method="POST">
-            Due Date: <input type="date" name="dueDate" placeholder="dueDate">
-            Description: <input type="text" name="description" placeholder="description" required>
-            class: <input type="number" name="classID" required>
-            <button type="submit" name="Submit" class="btn btn-success" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
-        </form>
+            <hr>
+        <nav class="navbar navbar-default navbar-fixed-bottom">
+            <div class="container">
+                <form action="/addTask" method="POST" class="nav navbar-nav">
+                    Due Date: <input type="date" name="dueDate" placeholder="dueDate">
+                    Description: <input type="text" name="description" placeholder="description" required style="width:38%">
+                    class: <input type="number" name="classID" required style="width:5%">
+                    <button type="submit" name="Submit" class="btn btn-success" value="Add"><span class="glyphicon glyphicon-plus"></span></button>
+                </form>
+                <a class="navbar-text nav navbar-nav navbar-right" href="./classes">Manage Classes</a>
+            </div>
+        </nav>
     </div>
     <!-- Latest compiled and minified CSS -->
 

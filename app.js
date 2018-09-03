@@ -7,10 +7,11 @@ app.use(bodyParser.urlencoded({
 }));
 const sqlite3 = require('sqlite3').verbose();
 
-var orderby = 'dueDate';
+var orderby = 'classID, dueDate';
 var tasks = [];
 var taskCount;
 var subTaskCount;
+var classes = [];
 
 //opening db connection for read write
 let db = new sqlite3.Database('./exampleDB.db', (err) => {
@@ -147,6 +148,60 @@ app.get("/orderbyDate", function (req, res) {
 app.get("/orderbyClass", function (req, res) {
     orderby = 'classID, dueDate';
     res.redirect('test');
+});
+
+app.get("/classes", function (req, res) {
+    q = "SELECT * FROM class ORDER BY classID"
+    db.serialize(() => {
+        db.all(q, (err, data) => {
+            if (err) {
+                throw err;
+            }
+            console.log(data);
+            classes = data;
+        });
+        res.redirect('./showClasses');
+    });
+});
+
+app.get("/showClasses", function (req, res) {
+    res.render('classes.ejs',{ classes:classes });
+});
+
+app.post("/deleteClass/:classID", function (req, res) {
+    db.serialize(() => {
+        // console.log(res);
+        // Queries scheduled here will be serialized.
+        var classID = req.params.classID;
+        db.all("SELECT subtaskID FROM tasks WHERE classID='" + classID + "';", function(err, rows) {
+            if(err) {
+                throw err;
+            }
+            rows.forEach(function (subtaskID) {
+                var q = "DELETE FROM tasks  WHERE subtaskID='" + subtaskID.subtaskID + "';";
+                console.log(q);
+                db.run(q);
+                q = "DELETE FROM subTasks  WHERE subtaskID='" + subtaskID.subtaskID + "';";
+                console.log(q);
+                db.run(q);
+                    });
+            });
+            var q = "DELETE FROM class  WHERE classID='" + classID + "';";
+            console.log(q);
+            db.run(q);
+            res.redirect("/classes");
+    });
+});
+
+app.post("/addClass", function (req, res) {
+    db.serialize(() => {
+        // console.log(res);
+        // Queries scheduled here will be serialized.
+        var insert = "INSERT INTO class VALUES('" + req.body.classID + "', '" + req.body.className + "' );";
+        console.log(insert);
+        db.run(insert);
+        res.redirect("/classes");
+    });
 });
 
 app.get("*", function (req, res) {
