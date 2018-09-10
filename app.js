@@ -141,7 +141,7 @@ app.get("/changeSubtaskStatus/:identifier", function (req, res) {
 });
 
 app.get("/orderbyDate", function (req, res) {
-    orderby = 'dueDate';
+    orderby = 'dueDate, classID';
     res.redirect('test');
 });
 
