@@ -34,7 +34,7 @@ app.get("/show", function (req, res) {
     taskCount = 0;
     tasks.forEach(item => {
         if (item.subtaskID >= taskCount) {
-            taskCount = item.subtaskID+1;
+            taskCount = item.subtaskID + 1;
         }
     });
 
@@ -42,7 +42,7 @@ app.get("/show", function (req, res) {
     tasks.forEach(item => {
         item.subTasks.forEach(mItem => {
             if (mItem.identifier >= subTaskCount) {
-                subTaskCount = mItem.identifier+1;
+                subTaskCount = mItem.identifier + 1;
             }
         });
     });
@@ -53,7 +53,7 @@ app.get("/test", function (req, res) {
     tasks = [];
     getPageData();
     app.locals.tasks = tasks;
-    console.log('this is tasks',tasks);
+    console.log('this is tasks', tasks);
     res.redirect('show');
 });
 
@@ -118,7 +118,7 @@ app.get("/changeStatus/:subtaskID", function (req, res) {
         if (err) {
             throw err;
         }
-        q = "UPDATE tasks SET status = " + ((data[0].status + 1) % 3 ) + " WHERE subtaskID='" + subtaskID + "';";
+        q = "UPDATE tasks SET status = " + ((data[0].status + 1) % 3) + " WHERE subtaskID='" + subtaskID + "';";
         console.log(q);
         db.run(q);
     });
@@ -133,7 +133,7 @@ app.get("/changeSubtaskStatus/:identifier", function (req, res) {
         if (err) {
             throw err;
         }
-        q = "UPDATE subTasks SET status = " + ((data[0].status + 1) % 2 ) + " WHERE identifier='" + identifier + "';";
+        q = "UPDATE subTasks SET status = " + ((data[0].status + 1) % 2) + " WHERE identifier='" + identifier + "';";
         console.log(q);
         db.run(q);
     });
@@ -165,7 +165,9 @@ app.get("/classes", function (req, res) {
 });
 
 app.get("/showClasses", function (req, res) {
-    res.render('classes.ejs',{ classes:classes });
+    res.render('classes.ejs', {
+        classes: classes
+    });
 });
 
 app.post("/deleteClass/:classID", function (req, res) {
@@ -173,8 +175,8 @@ app.post("/deleteClass/:classID", function (req, res) {
         // console.log(res);
         // Queries scheduled here will be serialized.
         var classID = req.params.classID;
-        db.all("SELECT subtaskID FROM tasks WHERE classID='" + classID + "';", function(err, rows) {
-            if(err) {
+        db.all("SELECT subtaskID FROM tasks WHERE classID='" + classID + "';", function (err, rows) {
+            if (err) {
                 throw err;
             }
             rows.forEach(function (subtaskID) {
@@ -184,12 +186,12 @@ app.post("/deleteClass/:classID", function (req, res) {
                 q = "DELETE FROM subTasks  WHERE subtaskID='" + subtaskID.subtaskID + "';";
                 console.log(q);
                 db.run(q);
-                    });
             });
-            var q = "DELETE FROM class  WHERE classID='" + classID + "';";
-            console.log(q);
-            db.run(q);
-            res.redirect("/classes");
+        });
+        var q = "DELETE FROM class  WHERE classID='" + classID + "';";
+        console.log(q);
+        db.run(q);
+        res.redirect("/classes");
     });
 });
 
@@ -243,7 +245,7 @@ function getPageData() {
             // app.locals.data = data;
             data.forEach(function (item, index, arr) {
                 var index = tasks.push(new task(item.status, item.dueDate, item.description, item.classID, item.subtaskID)) - 1;
-                q = createQuery('SELECT', 'className', 'class', 0,("classID='" + item.classID + "'"));
+                q = createQuery('SELECT', 'className', 'class', 0, ("classID='" + item.classID + "'"));
                 db.all(q, (err, mData) => {
                     if (err) {
                         throw err;
@@ -258,7 +260,7 @@ function getPageData() {
                     }
                     mData.forEach(function (mItem, mIndex, mArr) {
                         tasks[index].subTasks.push(new subTask(mItem.status, mItem.description, mItem.identifier));
-                        console.log(index,mIndex);
+                        console.log(index, mIndex);
                         if (index == 2 && mIndex == 1) {
                             console.log(tasks);
                             app.locals.data = data;
