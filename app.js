@@ -7,14 +7,14 @@ app.use(bodyParser.urlencoded({
 }));
 const sqlite3 = require('sqlite3').verbose();
 
-var orderby = 'classID, dueDate';
+var orderby = true;
 var tasks = [];
 var taskCount;
 var subTaskCount;
 var classes = [];
 
 //opening db connection for read write
-let db = new sqlite3.Database('./exampleDB.db', (err) => {
+let db = new sqlite3.Database('./taskDB.db', (err) => {
     if (err) {
         console.error(err.message);
     }
@@ -49,7 +49,7 @@ app.get("/show", function (req, res) {
             }
         });
     });
-    res.render('test.ejs');
+    res.render('home.ejs');
 });
 
 app.post("/addTask", function (req, res) {
@@ -121,12 +121,12 @@ app.get("/changeSubtaskStatus/:identifier", function (req, res) {
 });
 
 app.get("/orderbyDate", function (req, res) {
-    orderby = 'dueDate, classID';
+    orderby = false;
     res.redirect('/');
 });
 
 app.get("/orderbyClass", function (req, res) {
-    orderby = 'classID, dueDate';
+    orderby = true;
     res.redirect('/');
 });
 
@@ -189,9 +189,12 @@ app.listen(8080, process.env.IP, function () {
 
 function getPageData() {
     db.serialize(() => {
-        // Queries scheduled here will be serialized.
-        var stmt = db.prepare("SELECT * FROM tasks ORDER BY ?");
-        stmt.all(orderby, (err, data) => {
+        if (orderby) {
+            var stmt = db.prepare("SELECT * FROM tasks ORDER BY classID, dueDate");
+        } else {
+            var stmt = db.prepare("SELECT * FROM tasks ORDER BY dueDate, classID");
+        }
+        stmt.all([], (err, data) => {
             if (err) {
                 throw err;
             }
