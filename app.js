@@ -54,84 +54,68 @@ app.get("/show", function (req, res) {
 
 app.post("/addTask", function (req, res) {
     db.serialize(() => {
-
         var stmt = db.prepare("INSERT INTO tasks VALUES ('0', ?, ?, ?, ?)");
-        stmt.run(req.body.username, req.body.password);
+        stmt.run(req.body.dueDate, req.body.description, req.body.classID, taskCount);
         stmt.finalize();
-
-        // Queries scheduled here will be serialized.
-        var insert = "INSERT INTO tasks VALUES('" + 0 + "', '" + req.body.dueDate + "', '" + req.body.description + "', '" + req.body.classID + "', '" + taskCount + "' )";
-        console.log(insert);
-        db.run(insert);
     });
     res.redirect("/");
 });
 
 app.post("/addSubTask/:subtaskID", function (req, res) {
     db.serialize(() => {
-        // Queries scheduled here will be serialized.
-        var subtaskID = req.params.subtaskID;
-        var insert = "INSERT INTO subTasks VALUES('" + subtaskID + "', '0', '" + req.body.description + "', " + subTaskCount + " )";
-        console.log(insert);
-        db.run(insert);
-
+        var stmt = db.prepare("INSERT INTO subTasks VALUES (?, '0', ?, ?)");
+        stmt.run(req.params.subtaskID, req.body.description, subTaskCount);
+        stmt.finalize();
     });
     res.redirect("/");
 });
 
 app.post("/deleteSubTask/:identifier", function (req, res) {
     db.serialize(() => {
-        // Queries scheduled here will be serialized.
-        var identifier = req.params.identifier;
-        var q = "DELETE FROM subTasks WHERE identifier='" + identifier + "'";
-        console.log(q);
-        db.run(q);
-
+        var stmt = db.prepare("DELETE FROM subTasks WHERE identifier=?");
+        stmt.run(req.params.identifier);
+        stmt.finalize();
     });
     res.redirect("/");
 });
 
+//need to delete both tasks and subtasks here
 app.post("/deleteTask/:subtaskID", function (req, res) {
     db.serialize(() => {
-        // Queries scheduled here will be serialized.
-        var subtaskID = req.params.subtaskID;
-        var q = "DELETE FROM tasks  WHERE subtaskID='" + subtaskID + "';";
-        console.log(q);
-        db.run(q);
-        q = "DELETE FROM subTasks  WHERE subtaskID='" + subtaskID + "';";
-        console.log(q);
-        db.run(q);
-
+        var stmt = db.prepare("DELETE FROM tasks WHERE subtaskID=?");
+        stmt.run(req.params.subtaskID);
+        stmt.finalize();
+    });
+    db.serialize(() => {
+        var stmt = db.prepare("DELETE FROM subTasks WHERE subtaskID=?");
+        stmt.run(req.params.subtaskID);
+        stmt.finalize();
     });
     res.redirect("/");
 });
 
 app.get("/changeStatus/:subtaskID", function (req, res) {
-    console.log('in change Status!');
-    var subtaskID = req.params.subtaskID;
-    var q = "SELECT status FROM tasks WHERE subtaskID='" + subtaskID + "';";
-    db.all(q, (err, data) => {
-        if (err) {
+    var stmt = db.prepare("SELECT status FROM tasks WHERE subtaskID=?");
+    stmt.get(req.params.subtaskID, (err, data) => {
+        if(err) {
             throw err;
         }
-        q = "UPDATE tasks SET status = " + ((data[0].status + 1) % 3) + " WHERE subtaskID='" + subtaskID + "';";
-        console.log(q);
-        db.run(q);
+        var update = db.prepare("UPDATE tasks SET status=? WHERE subtaskID=?");
+        update.run((data.status+1)%3, req.params.subtaskID);
+        update.finalize();
     });
     res.redirect('/');
 });
 
 app.get("/changeSubtaskStatus/:identifier", function (req, res) {
-    console.log('in change SubTask Status!');
-    var identifier = req.params.identifier;
-    var q = "SELECT status FROM subTasks WHERE identifier='" + identifier + "';";
-    db.all(q, (err, data) => {
-        if (err) {
+    var stmt = db.prepare("SELECT status FROM subTasks WHERE identifier=?");
+    stmt.get(req.params.identifier, (err, data) => {
+        if(err) {
             throw err;
         }
-        q = "UPDATE subTasks SET status = " + ((data[0].status + 1) % 2) + " WHERE identifier='" + identifier + "';";
-        console.log(q);
-        db.run(q);
+        var update = db.prepare("UPDATE subTasks SET status=? WHERE identifier=?");
+        update.run((data.status+1)%2, req.params.identifier);
+        update.finalize();
     });
     res.redirect('/');
 });
@@ -148,7 +132,6 @@ app.get("/orderbyClass", function (req, res) {
 
 app.get("/classes", function (req, res) {
     db.serialize(() => {
-
         var stmt = db.prepare("SELECT * FROM class ORDER BY classID");
         stmt.all([], (err, data) => {
             if (err) {
@@ -168,36 +151,30 @@ app.get("/showClasses", function (req, res) {
 
 app.post("/deleteClass/:classID", function (req, res) {
     db.serialize(() => {
-        // console.log(res);
-        // Queries scheduled here will be serialized.
-        var classID = req.params.classID;
-        db.all("SELECT subtaskID FROM tasks WHERE classID='" + classID + "';", function (err, rows) {
+        var stmt = db.prepare("SELECT subtaskID FROM tasks WHERE classID=?");
+        stmt.all([req.params.classID], (err, rows) => {
             if (err) {
                 throw err;
             }
             rows.forEach(function (subtaskID) {
-                var q = "DELETE FROM tasks  WHERE subtaskID='" + subtaskID.subtaskID + "';";
-                console.log(q);
-                db.run(q);
-                q = "DELETE FROM subTasks  WHERE subtaskID='" + subtaskID.subtaskID + "';";
-                console.log(q);
-                db.run(q);
+                var del = db.prepare("DELETE FROM tasks WHERE subtaskID=?");
+                del.run(subtaskID.subtaskID);
+                del = db.prepare("DELETE FROM subTasks WHERE subtaskID=?");
+                del.run(subtaskID.subtaskID);
             });
         });
-        var q = "DELETE FROM class  WHERE classID='" + classID + "';";
-        console.log(q);
-        db.run(q);
+        stmt = db.prepare("DELETE FROM class WHERE classID=?");
+        stmt.run(req.params.classID);
+        stmt.finalize();
         res.redirect("/classes");
     });
 });
 
 app.post("/addClass", function (req, res) {
     db.serialize(() => {
-        // console.log(res);
-        // Queries scheduled here will be serialized.
-        var insert = "INSERT INTO class VALUES('" + req.body.classID + "', '" + req.body.className + "' );";
-        console.log(insert);
-        db.run(insert);
+        var stmt = db.prepare("INSERT INTO class VALUES (?, ?)");
+        stmt.run(req.body.classID, req.body.className);
+        stmt.finalize();
         res.redirect("/classes");
     });
 });
@@ -213,23 +190,25 @@ app.listen(8080, process.env.IP, function () {
 function getPageData() {
     db.serialize(() => {
         // Queries scheduled here will be serialized.
-        db.all(createQuery('SELECT', '*', 'tasks', orderby, 0), (err, data) => {
+        var stmt = db.prepare("SELECT * FROM tasks ORDER BY ?");
+        stmt.all(orderby, (err, data) => {
             if (err) {
                 throw err;
             }
             // app.locals.data = data;
             data.forEach(function (item, index, arr) {
                 var index = tasks.push(new task(item.status, item.dueDate, item.description, item.classID, item.subtaskID)) - 1;
-                q = createQuery('SELECT', 'className', 'class', 0, ("classID='" + item.classID + "'"));
-                db.all(q, (err, mData) => {
+                var getClass = db.prepare("SELECT className FROM class WHERE classID=?");
+
+                getClass.get(item.classID, (err, mData) => {
                     if (err) {
                         throw err;
                     }
-                    tasks[index].className = mData[0].className;
+                    tasks[index].className = mData.className;
                 });
 
-                q = createQuery('SELECT', '*', 'subTasks', 0, ("subtaskID='" + item.subtaskID + "'"));
-                db.all(q, (err, mData) => {
+                var getSubTasks = db.prepare("SELECT * FROM subTasks WHERE subtaskID=?");
+                getSubTasks.all(item.subtaskID, (err, mData) => {
                     if (err) {
                         throw err;
                     }
@@ -237,7 +216,6 @@ function getPageData() {
                         tasks[index].subTasks.push(new subTask(mItem.status, mItem.description, mItem.identifier));
                         console.log(index, mIndex);
                         if (index == 2 && mIndex == 1) {
-                            console.log(tasks);
                             app.locals.data = data;
                         }
                     });
@@ -245,19 +223,6 @@ function getPageData() {
             });
         });
     });
-}
-
-//NEED TO REPLACE THIS
-//should return string of formatted sql query
-function createQuery(command, field, table, orderby, where) {
-    var q = command + ' ' + field + ' FROM ' + table;
-    if (orderby) {
-        q += ' ORDER BY ' + orderby;
-    }
-    if (where) {
-        q += ' WHERE ' + where;
-    }
-    return q;
 }
 
 //object to hold each task information
