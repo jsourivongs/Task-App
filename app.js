@@ -23,11 +23,14 @@ let db = new sqlite3.Database('./exampleDB.db', (err) => {
 
 //Home page route
 app.get("/", function (req, res) {
-    res.redirect('test');
+    tasks = [];
+    getPageData();
+    app.locals.tasks = tasks;
+    res.redirect('show');
 });
 
 app.get("/credits", function (req, res) {
-    res.send('thats right bitch');
+    res.send('thats right');
 });
 
 app.get("/show", function (req, res) {
@@ -49,28 +52,23 @@ app.get("/show", function (req, res) {
     res.render('test.ejs');
 });
 
-app.get("/test", function (req, res) {
-    tasks = [];
-    getPageData();
-    app.locals.tasks = tasks;
-    console.log('this is tasks', tasks);
-    res.redirect('show');
-});
-
 app.post("/addTask", function (req, res) {
     db.serialize(() => {
-        // console.log(res);
+
+        var stmt = db.prepare("INSERT INTO tasks VALUES ('0', ?, ?, ?, ?)");
+        stmt.run(req.body.username, req.body.password);
+        stmt.finalize();
+
         // Queries scheduled here will be serialized.
         var insert = "INSERT INTO tasks VALUES('" + 0 + "', '" + req.body.dueDate + "', '" + req.body.description + "', '" + req.body.classID + "', '" + taskCount + "' )";
         console.log(insert);
         db.run(insert);
     });
-    res.redirect("/test");
+    res.redirect("/");
 });
 
 app.post("/addSubTask/:subtaskID", function (req, res) {
     db.serialize(() => {
-        // console.log(res);
         // Queries scheduled here will be serialized.
         var subtaskID = req.params.subtaskID;
         var insert = "INSERT INTO subTasks VALUES('" + subtaskID + "', '0', '" + req.body.description + "', " + subTaskCount + " )";
@@ -78,12 +76,11 @@ app.post("/addSubTask/:subtaskID", function (req, res) {
         db.run(insert);
 
     });
-    res.redirect("/test");
+    res.redirect("/");
 });
 
 app.post("/deleteSubTask/:identifier", function (req, res) {
     db.serialize(() => {
-        // console.log(res);
         // Queries scheduled here will be serialized.
         var identifier = req.params.identifier;
         var q = "DELETE FROM subTasks WHERE identifier='" + identifier + "'";
@@ -91,12 +88,11 @@ app.post("/deleteSubTask/:identifier", function (req, res) {
         db.run(q);
 
     });
-    res.redirect("/test");
+    res.redirect("/");
 });
 
 app.post("/deleteTask/:subtaskID", function (req, res) {
     db.serialize(() => {
-        // console.log(res);
         // Queries scheduled here will be serialized.
         var subtaskID = req.params.subtaskID;
         var q = "DELETE FROM tasks  WHERE subtaskID='" + subtaskID + "';";
@@ -107,7 +103,7 @@ app.post("/deleteTask/:subtaskID", function (req, res) {
         db.run(q);
 
     });
-    res.redirect("/test");
+    res.redirect("/");
 });
 
 app.get("/changeStatus/:subtaskID", function (req, res) {
@@ -122,7 +118,7 @@ app.get("/changeStatus/:subtaskID", function (req, res) {
         console.log(q);
         db.run(q);
     });
-    res.redirect('/test');
+    res.redirect('/');
 });
 
 app.get("/changeSubtaskStatus/:identifier", function (req, res) {
@@ -137,27 +133,27 @@ app.get("/changeSubtaskStatus/:identifier", function (req, res) {
         console.log(q);
         db.run(q);
     });
-    res.redirect('/test');
+    res.redirect('/');
 });
 
 app.get("/orderbyDate", function (req, res) {
     orderby = 'dueDate, classID';
-    res.redirect('test');
+    res.redirect('/');
 });
 
 app.get("/orderbyClass", function (req, res) {
     orderby = 'classID, dueDate';
-    res.redirect('test');
+    res.redirect('/');
 });
 
 app.get("/classes", function (req, res) {
-    q = "SELECT * FROM class ORDER BY classID"
     db.serialize(() => {
-        db.all(q, (err, data) => {
+
+        var stmt = db.prepare("SELECT * FROM class ORDER BY classID");
+        stmt.all([], (err, data) => {
             if (err) {
                 throw err;
             }
-            console.log(data);
             classes = data;
         });
         res.redirect('./showClasses');
@@ -210,30 +206,9 @@ app.get("*", function (req, res) {
     res.send('cannot find page');
 });
 
-app.listen(3000, process.env.IP, function () {
-    console.log('SERVER HAS STARTED!');
+app.listen(8080, process.env.IP, function () {
+    console.log('Server has started');
 });
-
-//This should close the db connection
-// db.close((err) => {
-//     if (err) {
-//         console.error(err.message);
-//     }
-//     console.log('Close the database connection.');
-//     });
-
-
-function readData() {
-    db.serialize(() => {
-        // Queries scheduled here will be serialized.
-        db.each(`SELECT * FROM tasks`, (err, row) => {
-            if (err) {
-                throw err;
-            }
-            return row;
-        });
-    });
-}
 
 function getPageData() {
     db.serialize(() => {
@@ -272,6 +247,7 @@ function getPageData() {
     });
 }
 
+//NEED TO REPLACE THIS
 //should return string of formatted sql query
 function createQuery(command, field, table, orderby, where) {
     var q = command + ' ' + field + ' FROM ' + table;
