@@ -21,11 +21,13 @@ let db = new sqlite3.Database('./taskDB.db', (err) => {
     console.log('Connected to the database.');
 });
 
+
+getPageData();
+app.locals.tasks = tasks;
+
 //Home page route
 app.get("/", function (req, res) {
     tasks = [];
-    getPageData();
-    app.locals.tasks = tasks;
     res.redirect('show');
 });
 
