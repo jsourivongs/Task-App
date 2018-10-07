@@ -217,7 +217,6 @@ function getPageData() {
                     }
                     mData.forEach(function (mItem, mIndex, mArr) {
                         tasks[index].subTasks.push(new subTask(mItem.status, mItem.description, mItem.identifier));
-                        console.log(index, mIndex);
                         if (index == 2 && mIndex == 1) {
                             app.locals.data = data;
                         }
